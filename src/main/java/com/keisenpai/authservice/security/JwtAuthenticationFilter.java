@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Получаем JWT из заголовка Authorization
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String username;
+        final String login;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -41,11 +41,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Извлекаем токен из заголовка
         jwt = authHeader.substring(7);
-        username = jwtTokenProvider.getUsernameFromToken(jwt);
+        login = jwtTokenProvider.getLoginFromToken(jwt);
 
         // Проверяем, что пользователь не аутентифицирован и токен валиден
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (login != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByLogin(login);
 
             if (jwtTokenProvider.validateToken(jwt, userDetails)) {
                 // Создаем объект аутентификации

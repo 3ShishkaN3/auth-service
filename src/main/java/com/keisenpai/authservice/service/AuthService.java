@@ -17,6 +17,7 @@ import com.keisenpai.authservice.domain.model.Role;
 import com.keisenpai.authservice.domain.model.User;
 import com.keisenpai.authservice.domain.model.UserStatus;
 import com.keisenpai.authservice.exception.EmailAlreadyExistsException;
+import com.keisenpai.authservice.exception.LoginAlreadyExistsException;
 import com.keisenpai.authservice.repository.UserRepository;
 import com.keisenpai.authservice.util.ValidationUtils;
 
@@ -38,7 +39,12 @@ public class AuthService {
 
         // Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException("Email already in use");
+                throw new EmailAlreadyExistsException("Email already in use");
+        }
+
+        // Check if login already exists
+        if (userRepository.existsByLogin(request.getLogin())) {
+                throw new LoginAlreadyExistsException("Login already in use");
         }
 
         // Generate verification token
@@ -48,8 +54,10 @@ public class AuthService {
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
+                .login(request.getLogin())
+                .firstname(request.getFirstName())
+                .patronname(request.getPatroName())
+                .lastname(request.getLastName())
                 .roles(Set.of(Role.ROLE_USER))
                 .status(UserStatus.PENDING_VERIFICATION)
                 .emailVerified(false)
@@ -73,16 +81,16 @@ public class AuthService {
         // Validate input
         ValidationUtils.validateAuthRequest(request);
 
-        // Authenticate user
+        // Authenticate user using login instead of email
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        request.getLogin(),
                         request.getPassword()
                 )
         );
 
-        // Find user
-        User user = userRepository.findByEmail(request.getEmail())
+        // Find user by login
+        User user = userRepository.findByLogin(request.getLogin())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Generate JWT token

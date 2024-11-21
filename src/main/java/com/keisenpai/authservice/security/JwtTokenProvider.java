@@ -35,7 +35,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getUsernameFromToken(String token) {
+    public String getLoginFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
@@ -53,8 +53,8 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        final String login = getLoginFromToken(token);
+        return (login.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     private boolean isTokenExpired(String token) {

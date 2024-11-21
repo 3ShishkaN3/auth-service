@@ -23,9 +23,15 @@ public class RegistrationRequestDto {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
+    @NotBlank(message = "Login is required")
+    private String login;
+
     @NotBlank(message = "First name is required")
     private String firstName;
 
     @NotBlank(message = "Last name is required")
     private String lastName;
+
+    @NotBlank(message = "Patronimic name is required")
+    private String patroName;
 }
